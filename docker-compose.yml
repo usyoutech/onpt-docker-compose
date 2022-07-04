@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+
+  onpt-frontend:
+    image: usyoutech/onpt-frontend:latest
+    hostname: onpt-frontend
+    container_name: onpt-frontend
+    tty: true
+    environment:
+      SERVICE_NAME: onpt-frontend
+      SERVICE_TAGS: production
+    env_file:
+      - .env.local
+    stdin_open: true
+    ports:
+      - '3030:3030'
+    networks:
+      - internal-network
+      - external-network
+    depends_on:
+      - onpt-backend
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-frontend.rule=Host(`ordre.pharmaciens.usyoulab.co`, `onpt.test.usyoulab.co`, `ordre-pharmaciens.usyoulab.co`,`onpt-test.usyoulab.co`)'
+      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - "traefik.port=80"
+      - "traefik.http.routers.onpt-frontend.tls=true"
+      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+
+  onpt-backend:
+    image: usyoutech/onpt-backend:latest
+    container_name: onpt-backend
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: ${MYSQL_HOST}
+      DATABASE_PORT: ${MYSQL_PORT}
+      DATABASE_NAME: ${MYSQL_DATABASE}
+      DATABASE_USERNAME: ${MYSQL_USER}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD}
+      DATABASE_AUTHENTICATION_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./backend:/srv/app
+    ports:
+      - "8020:1337"
+    depends_on:
+      - onpt-db
+    networks:
+      - internal-network
+      - external-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-backend.rule=Host(`panel-onpt.test.usyoulab.co`,`admin-onpt.test.usyoulab.co`)'
+      - "traefik.http.routers.onpt-backend.entrypoints=web,websecure"
+      - "traefik.http.routers.onpt-backend.tls=true"
+      - "traefik.http.routers.onpt-backend.tls.certresolver=lets-encrypt"
+      - "traefik.port=80"
+
+  onpt-db:
+    container_name: ${MYSQL_HOST}
+    hostname: ${MYSQL_HOST}
+    image: mysql:5.7
+    restart: always
+    env_file:
+      - .env.local
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./database/${MYSQL_HOST}:/var/lib/mysql/
+    ports:
+      - '3306:3306'
+    networks:
+      - internal-network
+
+  onpt-phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: 'onpt-phpmyadmin'
+    links:
+      - ${MYSQL_HOST}
+    env_file:
+      - .env.local
+    environment:
+      PMA_HOST: ${MYSQL_HOST}
+      PMA_PORT: ${MYSQL_PORT}
+      PMA_ARBITRARY: 1
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - '8082:80'
+    volumes:
+      - ./database/sessions/${MYSQL_HOST}:/sessions
+    depends_on:
+      - onpt-db
+    networks:
+      - internal-network
+
+volumes:
+  sessions:
+
+networks:
+  internal-network:
+    name: internal-network
+    driver: bridge
+
+  external-network:
+    external: true

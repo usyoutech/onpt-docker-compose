@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+
+  onpt-frontend:
+    image: usyoutech/onpt-frontend:latest
+    hostname: onpt-frontend
+    container_name: onpt-frontend
+    tty: true
+    env_file:
+      - ".env.production"
+    environment:
+      NEXT_PUBLIC_BACKEND_API_URL: "http://localhost:1337"
+      SERVICE_NAME: onpt-frontend
+      SERVICE_TAGS: production
+    stdin_open: true
+    networks:
+      - internal-network
+      - external-network
+    links:
+      - onpt-backend
+    depends_on:
+      - onpt-backend
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-frontend.rule=Host(`ordre.pharmaciens.tg`, `onpt.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`www.onpt.pharmaciens.tg`,`www.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - "traefik.port=80"
+      - "traefik.http.routers.onpt-frontend.tls=true"
+      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+
+  onpt-backend:
+    image: usyoutech/onpt-backend:latest
+    container_name: onpt-backend
+    restart: unless-stopped
+    env_file:
+      - ".env.production"
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: ${MYSQL_HOST}
+      DATABASE_PORT: ${MYSQL_PORT}
+      DATABASE_NAME: ${MYSQL_DATABASE}
+      DATABASE_USERNAME: ${MYSQL_USER}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD}
+      DATABASE_SSL: false
+      DATABASE_AUTHENTICATION_DATABASE: ${MYSQL_DATABASE}
+    depends_on:
+      - onpt-db
+    networks:
+      - internal-network
+      - external-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-frontend.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - "traefik.port=80"
+      - "traefik.http.routers.onpt-frontend.tls=true"
+      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+
+  onpt-db:
+    container_name: ${MYSQL_HOST}
+    hostname: ${MYSQL_HOST}
+    image: mysql:5.7
+    restart: always
+    env_file:
+      - ".env.production"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./database/${MYSQL_HOST}:/var/lib/mysql/
+    networks:
+      - internal-network
+      - external-network
+
+  onpt-phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: 'onpt-phpmyadmin'
+    links:
+      - ${MYSQL_HOST}
+    env_file:
+      - ".env.production"
+    environment:
+      PMA_HOST: ${MYSQL_HOST}
+      PMA_PORT: ${MYSQL_PORT}
+      PMA_ARBITRARY: 1
+    volumes:
+      - ./database/sessions/${MYSQL_HOST}:/sessions
+    depends_on:
+      - onpt-db
+    networks:
+      - internal-network
+      - external-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-frontend.rule=Host(`database.pharmaciens.tg`, `dbmanager.pharmaciens.tg`,`www.database.pharmaciens.tg`,`www.dbmanager.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - "traefik.port=80"
+      - "traefik.http.routers.onpt-frontend.tls=true"
+      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+
+volumes:
+  sessions:
+
+networks:
+  internal-network:
+    name: internal-network
+    driver: bridge
+
+  external-network:
+    external: true
