@@ -24,7 +24,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.onpt-frontend.rule=Host(`ordre.pharmaciens.tg`, `onpt.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`www.onpt.pharmaciens.tg`,`www.pharmaciens.tg`)'
-      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - "traefik.http.routers.onpt-frontend.entrypoints=web"
       - "traefik.port=80"
       - "traefik.http.routers.onpt-frontend.tls=true"
       - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
@@ -33,6 +33,8 @@ services:
     image: usyoutech/onpt-backend:latest
     container_name: onpt-backend
     restart: unless-stopped
+    volumes:
+      - ./store/:/public/
     env_file:
       - ".env.production"
     environment:
