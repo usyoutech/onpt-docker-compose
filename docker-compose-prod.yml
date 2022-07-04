@@ -51,11 +51,11 @@ services:
       - external-network
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-frontend.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`)'
-      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - 'traefik.http.routers.onpt-backend.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-backend.entrypoints=web,websecure"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-frontend.tls=true"
-      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.onpt-backend.tls=true"
+      - "traefik.http.routers.onpt-backend.tls.certresolver=lets-encrypt"
 
   onpt-db:
     container_name: ${MYSQL_HOST}
@@ -95,11 +95,11 @@ services:
       - external-network
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-frontend.rule=Host(`database.pharmaciens.tg`, `dbmanager.pharmaciens.tg`,`www.database.pharmaciens.tg`,`www.dbmanager.pharmaciens.tg`)'
-      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - 'traefik.http.routers.onpt-phpmyadmin.rule=Host(`database.pharmaciens.tg`, `dbmanager.pharmaciens.tg`,`www.database.pharmaciens.tg`,`www.dbmanager.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-phpmyadmin.entrypoints=web,websecure"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-frontend.tls=true"
-      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.onpt-phpmyadmin.tls=true"
+      - "traefik.http.routers.onpt-phpmyadmin.tls.certresolver=lets-encrypt"
 
 volumes:
   sessions:
