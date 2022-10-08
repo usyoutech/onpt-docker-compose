@@ -2,43 +2,43 @@ version: "3.8"
 
 services:
 
-  onpt-frontend:
+  onpt-frontend-prod:
     build:
       context: onpt-website-frontend
       dockerfile: Dockerfile
-    hostname: onpt-frontend
-    container_name: onpt-frontend
+    hostname: onpt-frontend-prod
+    container_name: onpt-frontend-prod
     tty: true
     env_file:
       - ".env.production"
     environment:
       NEXT_PUBLIC_BACKEND_API_URL: "http://localhost:1337"
-      SERVICE_NAME: onpt-frontend
+      SERVICE_NAME: onpt-frontend-prod
       SERVICE_TAGS: production
     stdin_open: true
     networks:
       - internal-network
       - external-network
     links:
-      - onpt-backend
+      - onpt-backend-prod
     depends_on:
-      - onpt-backend
+      - onpt-backend-prod
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-frontend.rule=Host(`ordre.pharmaciens.tg`, `onpt.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`www.onpt.pharmaciens.tg`,`www.pharmaciens.tg`)'
-      - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
+      - 'traefik.http.routers.onpt-frontend-prod.rule=Host(`ordre.pharmaciens.tg`, `onpt.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`www.onpt.pharmaciens.tg`,`www.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-frontend-prod.entrypoints=web,websecure"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-frontend.tls=true"
-      - "traefik.http.routers.onpt-frontend.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.onpt-frontend-prod.tls=true"
+      - "traefik.http.routers.onpt-frontend-prod.tls.certresolver=lets-encrypt"
 
-  onpt-backend:
+  onpt-backend-prod:
     build:
       context: onpt-website-backend
       dockerfile: Dockerfile
-    container_name: onpt-backend
+    container_name: onpt-backend-prod
     restart: unless-stopped
     volumes:
-      - ./store:/public/uploads
+      - ./onpt-website-backend/public:/public
     env_file:
       - ".env.production"
     environment:
@@ -51,19 +51,19 @@ services:
       DATABASE_SSL: false
       DATABASE_AUTHENTICATION_DATABASE: ${MYSQL_DATABASE}
     depends_on:
-      - onpt-db
+      - onpt-db-prod
     networks:
       - internal-network
       - external-network
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-backend.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`)'
-      - "traefik.http.routers.onpt-backend.entrypoints=web,websecure"
+      - 'traefik.http.routers.onpt-backend-prod.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`)'
+      - "traefik.http.routers.onpt-backend-prod.entrypoints=web,websecure"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-backend.tls=true"
-      - "traefik.http.routers.onpt-backend.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.onpt-backend-prod.tls=true"
+      - "traefik.http.routers.onpt-backend-prod.tls.certresolver=lets-encrypt"
 
-  onpt-db:
+  onpt-db-prod:
     container_name: ${MYSQL_HOST}
     hostname: ${MYSQL_HOST}
     image: mysql:5.7
@@ -95,7 +95,7 @@ services:
     volumes:
       - ./database/sessions/${MYSQL_HOST}:/sessions
     depends_on:
-      - onpt-db
+      - onpt-db-prod
     networks:
       - internal-network
       - external-network
