@@ -4,7 +4,7 @@ services:
 
   onpt-frontend-prod:
     build:
-      context: onpt-website-frontend
+      context: ../onpt-website-frontend
       dockerfile: Dockerfile
     hostname: onpt-frontend-prod
     container_name: onpt-frontend-prod
@@ -25,7 +25,7 @@ services:
       - onpt-backend-prod
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-frontend-prod.rule=Host(`ordre.pharmaciens.tg`, `onpt.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`www.onpt.pharmaciens.tg`,`www.pharmaciens.tg`)'
+      - 'traefik.http.routers.onpt-frontend-prod.rule=Host(`ordre.pharmaciens.tg`, `onpt.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`www.onpt.pharmaciens.tg`,`www.pharmaciens.tg`,`pharmaciens.local`)'
       - "traefik.http.routers.onpt-frontend-prod.entrypoints=web,websecure"
       - "traefik.port=80"
       - "traefik.http.routers.onpt-frontend-prod.tls=true"
@@ -33,12 +33,12 @@ services:
 
   onpt-backend-prod:
     build:
-      context: onpt-website-backend
+      context: ../onpt-website-backend
       dockerfile: Dockerfile
     container_name: onpt-backend-prod
     restart: unless-stopped
     volumes:
-      - ./onpt-website-backend/public:/public
+      - ../onpt-website-backend/public:/public
     env_file:
       - ".env.production"
     environment:
@@ -57,7 +57,7 @@ services:
       - external-network
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-backend-prod.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`)'
+      - 'traefik.http.routers.onpt-backend-prod.rule=Host(`panel.pharmaciens.tg`, `admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`,`admin.pharmaciens.local`)'
       - "traefik.http.routers.onpt-backend-prod.entrypoints=web,websecure"
       - "traefik.port=80"
       - "traefik.http.routers.onpt-backend-prod.tls=true"
@@ -101,7 +101,7 @@ services:
       - external-network
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-phpmyadmin.rule=Host(`database.pharmaciens.tg`, `dbmanager.pharmaciens.tg`,`www.database.pharmaciens.tg`,`www.dbmanager.pharmaciens.tg`)'
+      - 'traefik.http.routers.onpt-phpmyadmin.rule=Host(`database.pharmaciens.tg`, `dbmanager.pharmaciens.tg`,`www.database.pharmaciens.tg`,`www.dbmanager.pharmaciens.tg`,`db.pharmaciens.local`)'
       - "traefik.http.routers.onpt-phpmyadmin.entrypoints=web,websecure"
       - "traefik.port=80"
       - "traefik.http.routers.onpt-phpmyadmin.tls=true"
