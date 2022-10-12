@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+
+  onpt-frontend-local:
+    build:
+      context: ../../onpt-website-frontend
+      dockerfile: Dockerfile
+    hostname: onpt-frontend-local
+    container_name: onpt-frontend-local
+    tty: true
+    env_file:
+      - ".env"
+    environment:
+      NEXT_PUBLIC_BACKEND_API_URL: "http://localhost:1337"
+      SERVICE_NAME: onpt-frontend-local
+      SERVICE_TAGS: test
+    stdin_open: true
+    networks:
+      - internal-network
+      - external-network
+    links:
+      - onpt-backend-local
+    depends_on:
+      - onpt-backend-local
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-frontend-local.rule=Host(`ordre.pharmaciens.dev`,`www.pharmaciens.dev`)'
+      - "traefik.http.routers.onpt-frontend-local-secure.rule=Host(`ordre.pharmaciens.dev`,`www.pharmaciens.dev`)"
+      - "traefik.http.routers.onpt-frontend-local.entrypoints=web"
+      - "traefik.port=80"
+
+  onpt-backend-local:
+    build:
+      context: ../../onpt-website-backend
+      dockerfile: Dockerfile
+    container_name: onpt-backend-local
+    restart: unless-stopped
+    volumes:
+      - ../../onpt-website-backend/public:/public
+    env_file:
+      - ".env"
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: ${MYSQL_HOST}
+      DATABASE_PORT: ${MYSQL_PORT}
+      DATABASE_NAME: ${MYSQL_DATABASE}
+      DATABASE_USERNAME: ${MYSQL_USER}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD}
+      DATABASE_SSL: false
+      DATABASE_AUTHENTICATION_DATABASE: ${MYSQL_DATABASE}
+      SERVICE_TAGS: test
+
+    networks:
+      - internal-network
+      - external-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-backend-local.rule=Host(`admin.pharmaciens.dev`)'
+      - "traefik.http.routers.onpt-backend-local-secure.rule=Host(`admin.pharmaciens.dev`)"
+      - "traefik.http.routers.onpt-backend-local.entrypoints=web"
+      - "traefik.port=80"
+
+volumes:
+  sessions:
+
+networks:
+  internal-network:
+    name: internal-network
+    driver: bridge
+
+  external-network:
+    external: true

@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+
+  onpt-db:
+    container_name: ${MYSQL_HOST}
+    hostname: ${MYSQL_HOST}
+    image: mysql:5.7
+    restart: always
+    env_file:
+      - ".env"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SERVICE_TAGS: database
+    volumes:
+      - ./database/${MYSQL_HOST}:/var/lib/mysql/
+    networks:
+      - internal-network
+      - external-network
+
+  onpt-phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: 'onpt-phpmyadmin'
+    links:
+      - ${MYSQL_HOST}
+    env_file:
+      - ".env"
+    environment:
+      PMA_HOST: ${MYSQL_HOST}
+      PMA_PORT: ${MYSQL_PORT}
+      PMA_ARBITRARY: 1
+      SERVICE_TAGS: database
+    volumes:
+      - ./database/sessions/${MYSQL_HOST}:/sessions
+    depends_on:
+      - onpt-db
+    networks:
+      - internal-network
+      - external-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-phpmyadmin.rule=Host(`db.pharmaciens.dev`, `db.pharmaciens.tg`, `dbpharmaciens.usyoulab.co`)'
+      - "traefik.http.routers.onpt-phpmyadmin.entrypoints=web"
+      - "traefik.port=80"
+
+volumes:
+  sessions:
+
+networks:
+  internal-network:
+    name: internal-network
+    driver: bridge
+
+  external-network:
+    external: true
