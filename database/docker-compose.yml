@@ -43,10 +43,8 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.onpt-phpmyadmin.rule=Host(`db.pharmaciens.dev`, `db.pharmaciens.tg`, `dbpharmaciens.usyoulab.co`)'
-      - "traefik.http.routers.onpt-phpmyadmin.entrypoints=web,websecure"
+      - "traefik.http.routers.onpt-phpmyadmin.entrypoints=web"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-phpmyadmin.tls=true"
-      - "traefik.http.routers.onpt-phpmyadmin.tls.certresolver=lets-encrypt"
 
 volumes:
   sessions:

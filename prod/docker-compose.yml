@@ -26,6 +26,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.onpt-frontend.rule=Host(`ordre.pharmaciens.tg`,`www.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`onpt.pharmaciens.tg`)'
+      - 'traefik.http.routers.onpt-frontend-secure.rule=Host(`ordre.pharmaciens.tg`,`www.pharmaciens.tg`,`www.ordre.pharmaciens.tg`,`onpt.pharmaciens.tg`)'
       - "traefik.http.routers.onpt-frontend.entrypoints=web,websecure"
       - "traefik.port=80"
       - "traefik.http.routers.onpt-frontend.tls=true"
@@ -57,6 +58,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.onpt-backend.rule=Host(`admin.pharmaciens.tg`,`panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`)'
+      - 'traefik.http.routers.onpt-backend-secure.rule=Host(`admin.pharmaciens.tg`,`panel.pharmaciens.tg`,`www.admin.pharmaciens.tg`,`www.panel.pharmaciens.tg`)'
       - "traefik.http.routers.onpt-backend.entrypoints=web,websecure"
       - "traefik.port=80"
       - "traefik.http.routers.onpt-backend.tls=true"

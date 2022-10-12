@@ -2,41 +2,39 @@ version: "3.8"
 
 services:
 
-  onpt-frontend-test:
+  onpt-frontend-local:
     build:
       context: ../../onpt-website-frontend
       dockerfile: Dockerfile
-    hostname: onpt-frontend-test
-    container_name: onpt-frontend-test
+    hostname: onpt-frontend-local
+    container_name: onpt-frontend-local
     tty: true
     env_file:
       - ".env"
     environment:
       NEXT_PUBLIC_BACKEND_API_URL: "http://localhost:1337"
-      SERVICE_NAME: onpt-frontend-test
+      SERVICE_NAME: onpt-frontend-local
       SERVICE_TAGS: test
     stdin_open: true
     networks:
       - internal-network
       - external-network
     links:
-      - onpt-backend-test
+      - onpt-backend-local
     depends_on:
-      - onpt-backend-test
+      - onpt-backend-local
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-frontend-test.rule=Host(`onpt.usyoulab.co`)'
-      - "traefik.http.routers.onpt-frontend-test-secure.rule=Host(`onpt.usyoulab.co`)"
-      - "traefik.http.routers.onpt-frontend-test.entrypoints=web,websecure"
+      - 'traefik.http.routers.onpt-frontend-local.rule=Host(`ordre.pharmaciens.dev`,`www.pharmaciens.dev`)'
+      - "traefik.http.routers.onpt-frontend-local-secure.rule=Host(`ordre.pharmaciens.dev`,`www.pharmaciens.dev`)"
+      - "traefik.http.routers.onpt-frontend-local.entrypoints=web"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-frontend-test.tls=true"
-      - "traefik.http.routers.onpt-frontend-test.tls.certresolver=lets-encrypt"
 
-  onpt-backend-test:
+  onpt-backend-local:
     build:
       context: ../../onpt-website-backend
       dockerfile: Dockerfile
-    container_name: onpt-backend-test
+    container_name: onpt-backend-local
     restart: unless-stopped
     volumes:
       - ../../onpt-website-backend/public:/public
@@ -58,12 +56,10 @@ services:
       - external-network
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.onpt-backend-test.rule=Host(`admin.onpt.usyoulab.co`)'
-      - "traefik.http.routers.onpt-backend-test-secure.rule=Host(`admin.onpt.usyoulab.co`)"
-      - "traefik.http.routers.onpt-backend-test.entrypoints=web,websecure"
+      - 'traefik.http.routers.onpt-backend-local.rule=Host(`admin.pharmaciens.dev`)'
+      - "traefik.http.routers.onpt-backend-local-secure.rule=Host(`admin.pharmaciens.dev`)"
+      - "traefik.http.routers.onpt-backend-local.entrypoints=web"
       - "traefik.port=80"
-      - "traefik.http.routers.onpt-backend-test.tls=true"
-      - "traefik.http.routers.onpt-backend-test.tls.certresolver=lets-encrypt"
 
 volumes:
   sessions:
