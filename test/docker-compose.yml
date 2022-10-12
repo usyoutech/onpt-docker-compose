@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+
+  onpt-frontend-test:
+    build:
+      context: ../../onpt-website-frontend
+      dockerfile: Dockerfile
+    hostname: onpt-frontend-test
+    container_name: onpt-frontend-test
+    tty: true
+    env_file:
+      - ".env"
+    environment:
+      NEXT_PUBLIC_BACKEND_API_URL: "http://localhost:1337"
+      SERVICE_NAME: onpt-frontend-test
+      SERVICE_TAGS: test
+    stdin_open: true
+    networks:
+      - internal-network
+      - external-network
+    links:
+      - onpt-backend-test
+    depends_on:
+      - onpt-backend-test
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-frontend-test.rule=Host(`ordre.pharmaciens.dev`,`www.pharmaciens.dev`,`onpt.usyoulab.co`)'
+      - "traefik.http.routers.onpt-frontend-test.entrypoints=web,websecure"
+      - "traefik.port=80"
+      - "traefik.http.routers.onpt-frontend-test.tls=false"
+      - "traefik.http.routers.onpt-frontend-test.tls.certresolver=lets-encrypt"
+
+  onpt-backend-test:
+    build:
+      context: ../../onpt-website-backend
+      dockerfile: Dockerfile
+    container_name: onpt-backend-test
+    restart: unless-stopped
+    volumes:
+      - ../../onpt-website-backend/public:/public
+    env_file:
+      - ".env"
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: ${MYSQL_HOST}
+      DATABASE_PORT: ${MYSQL_PORT}
+      DATABASE_NAME: ${MYSQL_DATABASE}
+      DATABASE_USERNAME: ${MYSQL_USER}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD}
+      DATABASE_SSL: false
+      DATABASE_AUTHENTICATION_DATABASE: ${MYSQL_DATABASE}
+      SERVICE_TAGS: test
+
+    networks:
+      - internal-network
+      - external-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.onpt-backend-test.rule=Host(`admin.pharmaciens.dev`)'
+      - "traefik.http.routers.onpt-backend-test.entrypoints=web,websecure"
+      - "traefik.port=80"
+      - "traefik.http.routers.onpt-backend-test.tls=false"
+      - "traefik.http.routers.onpt-backend-test.tls.certresolver=lets-encrypt"
+
+volumes:
+  sessions:
+
+networks:
+  internal-network:
+    name: internal-network
+    driver: bridge
+
+  external-network:
+    external: true
