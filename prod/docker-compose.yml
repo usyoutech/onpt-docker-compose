@@ -12,7 +12,7 @@ services:
     env_file:
       - ".env"
     environment:
-      NEXT_PUBLIC_BACKEND_API_URL: "http://localhost:1337"
+      NEXT_PUBLIC_BACKEND_API_URL: "http://panel.pharmaciens.tg"
       SERVICE_NAME: onpt-frontend
       SERVICE_TAGS: production
     stdin_open: true
