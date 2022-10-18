@@ -33,11 +33,16 @@ services:
   onpt-backend-local:
     build:
       context: ../../onpt-website-backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: onpt-backend-local
     restart: unless-stopped
     volumes:
-      - ../../onpt-website-backend/public:/public
+      - ../../onpt-website-backend/public:/app/public
+      - ../../onpt-website-backend/config:/app/config
+      - ../../onpt-website-backend/src:/app/src
+      - ../../onpt-website-backend/package.json:/app/package.json
+      - ../../onpt-website-backend/.env:/app/.env
+      - ../../onpt-website-backend/public/uploads:/app/public/uploads
     env_file:
       - ".env"
     environment:
@@ -58,8 +63,10 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.onpt-backend-local.rule=Host(`admin.pharmaciens.dev`)'
       - "traefik.http.routers.onpt-backend-local-secure.rule=Host(`admin.pharmaciens.dev`)"
-      - "traefik.http.routers.onpt-backend-local.entrypoints=web"
+      - "traefik.http.routers.onpt-backend.entrypoints=web,websecure"
       - "traefik.port=80"
+      - "traefik.http.routers.onpt-backend.tls=true"
+      - "traefik.http.routers.onpt-backend.tls.certresolver=lets-encrypt"
 
 volumes:
   sessions:

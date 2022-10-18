@@ -39,7 +39,12 @@ services:
     container_name: onpt-backend-test
     restart: unless-stopped
     volumes:
-      - ../../onpt-website-backend/public:/public
+      - ../../onpt-website-backend/public:/app/public
+      - ../../onpt-website-backend/config:/app/config
+      - ../../onpt-website-backend/src:/app/src
+      - ../../onpt-website-backend/package.json:/app/package.json
+      - ../../onpt-website-backend/.env:/app/.env
+      - ../../onpt-website-backend/public/uploads:/app/public/uploads
     env_file:
       - ".env"
     environment:
